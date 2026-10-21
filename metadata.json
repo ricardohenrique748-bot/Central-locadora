@@ -1,0 +1,6 @@
+{
+  "name": "Central Locação - Gestão de Equipamentos",
+  "description": "Sistema ERP completo para locação de equipamentos da construção civil da Central Locadora Rio Preto (Lynus Tecnologia).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
