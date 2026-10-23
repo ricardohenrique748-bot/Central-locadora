@@ -244,8 +244,32 @@ export function isDue(db: DB, now = new Date()): boolean {
 }
 
 let eventTimer: NodeJS.Timeout | null = null;
+let inlineMode = false;
+let pendingEvent = false;
+
+/** Ambiente sem processo contínuo (ex.: Vercel): sem timers, o processamento roda via runPendingProcessing a cada requisição. */
+export function useInlineProcessing() {
+  inlineMode = true;
+}
+
+/** Modo inline: executa o reprocessamento pendente por evento ou, se vencido, o agendado. */
+export function runPendingProcessing(db: DB) {
+  const trigger = pendingEvent ? 'evento' : isDue(db) ? 'agendado' : null;
+  pendingEvent = false;
+  if (!trigger) return;
+  try {
+    runProcessing(db, trigger);
+  } catch (e) {
+    console.error(`[notificacoes] falha no processamento (${trigger}):`, e);
+  }
+}
+
 /** Disparo por evento: após operações relevantes (gravações nos módulos), reprocessa com pequeno atraso agrupado. */
 export function requestEventRun(db: DB) {
+  if (inlineMode) {
+    pendingEvent = true;
+    return;
+  }
   if (eventTimer) return;
   eventTimer = setTimeout(() => {
     eventTimer = null;

@@ -4,15 +4,11 @@
  */
 
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import path from 'node:path';
 import { openDatabase } from './server/db';
-import { seedIfEmpty, seedStockIfEmpty } from './server/seed';
-import { seedFinanceIfEmpty } from './server/services/finance/registry';
-import { seedOsIfEmpty } from './server/services/os/core';
+import { seedAll } from './server/seed';
 import { startNotificationScheduler } from './server/services/notifications/engine';
-import { createApi } from './server/api';
-import { errorHandler } from './server/http';
+import { createApp } from './server/app';
 
 const PORT = Number(process.env.PORT) || 3000;
 const isProd = process.env.NODE_ENV === 'production' || process.argv.includes('--prod');
@@ -20,18 +16,10 @@ const DB_FILE = process.env.DB_FILE || path.resolve('data', 'central.db');
 
 async function main() {
   const db = openDatabase(DB_FILE);
-  seedIfEmpty(db);
-  seedStockIfEmpty(db);
-  seedFinanceIfEmpty(db);
-  seedOsIfEmpty(db);
+  seedAll(db);
   startNotificationScheduler(db); // verificação recorrente de prazos e vencimentos, com log
 
-  const app = express();
-  app.disable('x-powered-by');
-  app.set('trust proxy', 'loopback');
-  app.use(express.json({ limit: '2mb' }));
-  app.use(cookieParser());
-  app.use('/api', createApi(db), errorHandler);
+  const app = createApp(db);
 
   if (isProd) {
     const dist = path.resolve('dist');

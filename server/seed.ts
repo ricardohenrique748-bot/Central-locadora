@@ -8,6 +8,8 @@ import { clientesIniciais, equipamentosIniciais, estoqueGranelInicial, patrimoni
 import { isValidCNPJ, isValidCPF, onlyDigits } from '../shared/orcamentos/validators';
 import { addDaysISO, todayISO } from '../shared/orcamentos/dates';
 import { applyMovement, assetEvent, nextNumber, refreshAssetRental } from './services/stock/core';
+import { seedFinanceIfEmpty } from './services/finance/registry';
+import { seedOsIfEmpty } from './services/os/core';
 
 const ADMIN = {
   name: 'Ricardo Luz (Lynus)',
@@ -171,4 +173,12 @@ export function seedStockIfEmpty(db: DB) {
       }
     }
   });
+}
+
+/** Todas as cargas iniciais, na ordem em que dependem umas das outras. */
+export function seedAll(db: DB) {
+  seedIfEmpty(db);
+  seedStockIfEmpty(db);
+  seedFinanceIfEmpty(db);
+  seedOsIfEmpty(db);
 }
