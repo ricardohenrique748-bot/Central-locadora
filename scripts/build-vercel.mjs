@@ -25,6 +25,8 @@ await build({
   // dependências ESM (pdfkit) resolvem arquivos via import.meta.url, que não existe em CJS
   banner: { js: "const __importMetaUrl = require('node:url').pathToFileURL(__filename).href;" },
   define: { 'import.meta.url': '__importMetaUrl' },
+  // o launcher da Vercel espera a função como export do módulo
+  footer: { js: 'module.exports = module.exports.default;' },
   logLevel: 'warning',
 });
 // arquivos lidos do disco em tempo de execução: perfil de cor do pdfkit (relativo ao bundle) e logo dos PDFs (relativo ao cwd)
